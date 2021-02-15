@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useReducer, useEffect } from 'react'
 import styled from 'styled-components'
 import Header from './components/Header'
 import Movies from './components/Movies'
@@ -13,36 +13,92 @@ const Container = styled.div`
 const MOVIE_BASE_URL = process.env.REACT_APP_OMDB_BASE_URL
 const MOVIE_API_KEY = process.env.REACT_APP_OMDB_API_KEY
 
+const initialState = {
+  isLoading: true,
+  movies: [],
+  errorMessage: null,
+}
+
+const reducer = (state, action) => {
+  switch (action.type) {
+    case 'SEARCH_MOVIES_REQUEST':
+      return {
+        ...state,
+        isLoading: true,
+        errorMessage: null,
+      }
+    case 'SEARCH_MOVIES_SUCCESS':
+      return {
+        ...state,
+        isLoading: false,
+        movies: action.payload,
+      }
+    case 'SEARCH_MOVIES_FAILURE':
+      return {
+        ...state,
+        isLoading: false,
+        errorMessage: action.payload,
+      }
+    default:
+      return state
+  }
+}
+
 const App = () => {
-  const [isLoading, setIsLoading] = useState(true)
-  const [movies, setMovies] = useState([])
-  const [errorMessage, setErrorMessage] = useState(null)
+  const [state, dispatch] = useReducer(reducer, initialState)
 
   useEffect(() => {
+    dispatch({
+      type: 'SEARCH_MOVIES_REQUEST',
+    })
+
     fetch(`${MOVIE_BASE_URL}?s=woman&apikey=${MOVIE_API_KEY}`)
-      .then((response) => response.json())
+      .then((response) => {
+        if (response.status >= 200 && response.status <= 299) return response.json()
+        throw Error(response.statusText)
+      })
       .then((jsonResponse) => {
-        setMovies(jsonResponse.Search)
-        setIsLoading(false)
+        dispatch({
+          type: 'SEARCH_MOVIES_SUCCESS',
+          payload: jsonResponse.Search,
+        })
+      })
+      .catch((error) => {
+        dispatch({
+          type: 'SEARCH_MOVIES_FAILURE',
+          payload: error.message,
+        })
       })
   }, [])
 
   const handleSearch = (search) => {
-    setIsLoading(true)
-    setErrorMessage(null)
-
+    dispatch({
+      type: 'SEARCH_MOVIES_REQUEST',
+    })
     fetch(`${MOVIE_BASE_URL}?s=${search}&apikey=${MOVIE_API_KEY}`)
-      .then((response) => response.json())
+      .then((response) => {
+        if (response.status >= 200 && response.status <= 299) return response.json()
+        throw Error(response.statusText)
+      })
       .then((jsonResponse) => {
         if (jsonResponse.Response === 'True') {
-          setMovies(jsonResponse.Search)
-          setIsLoading(false)
+          dispatch({
+            type: 'SEARCH_MOVIES_SUCCESS',
+            payload: jsonResponse.Search,
+          })
         } else {
-          setErrorMessage(jsonResponse.Error)
-          setIsLoading(false)
+          throw Error(jsonResponse.Error)
         }
       })
+      .catch((error) => {
+        dispatch({
+          type: 'SEARCH_MOVIES_FAILURE',
+          payload: error.message,
+        })
+      })
   }
+
+  const { movies, isLoading, errorMessage } = state
 
   return (
     <Container>
