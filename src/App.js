@@ -48,38 +48,16 @@ const App = () => {
   const [state, dispatch] = useReducer(reducer, initialState)
 
   useEffect(() => {
-    dispatch({
-      type: 'SEARCH_MOVIES_REQUEST',
-    })
-
-    fetch(`${MOVIE_BASE_URL}?s=woman&apikey=${MOVIE_API_KEY}`)
-      .then((response) => {
-        if (response.status >= 200 && response.status <= 299) return response.json()
-        throw Error(response.statusText)
-      })
-      .then((jsonResponse) => {
-        dispatch({
-          type: 'SEARCH_MOVIES_SUCCESS',
-          payload: jsonResponse.Search,
-        })
-      })
-      .catch((error) => {
-        dispatch({
-          type: 'SEARCH_MOVIES_FAILURE',
-          payload: error.message,
-        })
-      })
+    handleFetch()
   }, [])
 
-  const handleSearch = (search) => {
+  const handleFetch = (search) => {
     dispatch({
       type: 'SEARCH_MOVIES_REQUEST',
     })
-    fetch(`${MOVIE_BASE_URL}?s=${search}&apikey=${MOVIE_API_KEY}`)
-      .then((response) => {
-        if (response.status >= 200 && response.status <= 299) return response.json()
-        throw Error(response.statusText)
-      })
+
+    fetch(`${MOVIE_BASE_URL}?s=${search ? search : 'woman'}&apikey=${MOVIE_API_KEY}`)
+      .then((response) => response.json())
       .then((jsonResponse) => {
         if (jsonResponse.Response === 'True') {
           dispatch({
@@ -96,6 +74,10 @@ const App = () => {
           payload: error.message,
         })
       })
+  }
+
+  const handleSearch = (search) => {
+    handleFetch(search)
   }
 
   const { movies, isLoading, errorMessage } = state
