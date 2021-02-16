@@ -4,7 +4,14 @@ import Loader from './Loader'
 import ErrorMesasage from './ErrorMessage'
 import Movie from './MovieItem'
 
-const Container = styled.div``
+const Container = styled.div`
+  max-width: 1200px;
+  width: 100%;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, 200px);
+  justify-content: center;
+  grid-gap: 40px;
+`
 
 const Movies = ({ movies, errorMessage, isLoading }) => {
   if (isLoading && !errorMessage) return <Loader />

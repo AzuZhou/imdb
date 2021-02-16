@@ -5,9 +5,11 @@ import Movies from './components/Movies'
 import Search from './components/Search'
 
 const Container = styled.div`
+  width: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
+  padding: 40px 60px;
 `
 
 const MOVIE_BASE_URL = process.env.REACT_APP_OMDB_BASE_URL

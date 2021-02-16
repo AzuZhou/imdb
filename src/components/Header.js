@@ -3,7 +3,12 @@ import styled from 'styled-components'
 
 const Container = styled.header`
   text-align: center;
-  margin: 20px;
+  margin-bottom: 60px;
+
+  h1 {
+    font-weight: 900;
+    font-size: 52px;
+  }
 `
 
 const Header = ({ name }) => (
